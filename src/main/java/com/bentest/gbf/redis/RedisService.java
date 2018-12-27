@@ -43,20 +43,16 @@ public class RedisService {
 		}
 	}
 	
-	public <T> boolean set(String key, T value) {
+	public String get(String key) {
+		
 		Jedis jedis = null;
 		try {
 			jedis = jedisPool.getResource();
 			
-			String value = valueToString(value);
-			
-			jedis.set(key, value);
-			String jsonStrValue = jedis.get(key);
-			
-			return JSON.parseObject(jsonStrValue, clazz);
+			return jedis.get(key);
 			
 		} catch (Exception e) {
-			logger.error("redis，获取，异常。", e);
+			logger.error("redis，获取StringValue，异常。", e);
 			return null;
 		}
 		finally
@@ -65,9 +61,44 @@ public class RedisService {
 		}
 	}
 	
+	public <T> boolean set(String key, T value) {
+		Jedis jedis = null;
+		try {
+			jedis = jedisPool.getResource();
+			
+			String valueStr = valueToString(value);
+			
+			jedis.set(key, valueStr);
+			
+			return true;
+			
+		} catch (Exception e) {
+			logger.error("redis，设置，异常。", e);
+			return false;
+		}
+		finally
+		{
+			closeRedisConn(jedis);
+		}
+	}
+	
 	private <T> String valueToString(T value) {
-		// TODO Auto-generated method stub
-		return null;
+		if(value == null) {
+			return null;
+		}
+		
+		// 基础类型则直接返回，不需要转json
+		if(value.getClass() == int.class || value.getClass() == Integer.class) {
+			return String.valueOf(value);
+		}else if(value.getClass() == long.class || value.getClass() == Long.class) {
+			return String.valueOf(value);
+		}else if(value.getClass() == float.class || value.getClass() == Float.class) {
+			return String.valueOf(value);
+		}else if(value.getClass() == double.class || value.getClass() == Double.class) {
+			return String.valueOf(value);
+		}
+		
+		return JSON.toJSONString(value);
 	}
 
 	private void closeRedisConn(Jedis jedis) {
