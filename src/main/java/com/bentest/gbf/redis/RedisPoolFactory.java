@@ -4,42 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
-import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 @Service
-public class RedisService {
-
+public class RedisPoolFactory {
 	@Autowired
-	JedisPool jedisPool;
+	private RedisConfig redisConfig;
 	
-	@Autowired
-	RedisConfig redisConfig;
-	
-	public <T> T get(String key, Class<T> clazz) {
-		
-		Jedis jedis = null;
-		try {
-			jedis = jedisPool.getResource();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		finally
-		{
-			closeRedisConn(jedis);
-		}
-	}
-	
-	private void closeRedisConn(Jedis jedis) {
-		if(jedis != null)
-		{
-			jedis.close();
-		}
-		
-	}
-
 	@Bean
 	public JedisPool JedisPoolFactory() {
 		JedisPoolConfig poolConfig = new JedisPoolConfig();
@@ -51,4 +23,5 @@ public class RedisService {
 				redisConfig.getTimeout() * 1000, redisConfig.getPassword());
 		return jedisPool;
 	}
+	
 }

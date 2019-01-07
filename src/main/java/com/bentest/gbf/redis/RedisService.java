@@ -3,25 +3,21 @@ package com.bentest.gbf.redis;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
 
 @Service
 public class RedisService {
 	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
-
-	@Autowired
-	JedisPool jedisPool;
 	
 	@Autowired
-	RedisConfig redisConfig;
+	private JedisPool jedisPool;
+	
 	
 	public <T> T get(String key, Class<T> clazz) {
 		
@@ -31,7 +27,7 @@ public class RedisService {
 			
 			String jsonStrValue = jedis.get(key);
 			
-			return JSON.parseObject(jsonStrValue, clazz);
+			return stringToBean(jsonStrValue, clazz);
 			
 		} catch (Exception e) {
 			logger.error("redis，获取，异常。", e);
@@ -43,6 +39,27 @@ public class RedisService {
 		}
 	}
 	
+	private <T> T stringToBean(String jsonStrValue, Class<T> clazz) {
+		if(jsonStrValue == null || jsonStrValue.length() < 1 || clazz == null) {
+			return null;
+		}
+		
+		// 基础类型则直接返回，不需要转json
+		if(clazz == String.class) {
+			return (T)String.valueOf(jsonStrValue);
+		}else if(clazz == int.class || clazz == Integer.class) {
+			return (T)Integer.valueOf(jsonStrValue);
+		}else if(clazz == long.class || clazz == Long.class) {
+			return (T)Long.valueOf(jsonStrValue);
+		}else if(clazz == float.class || clazz == Float.class) {
+			return (T)Float.valueOf(jsonStrValue);
+		}else if(clazz == double.class || clazz == Double.class) {
+			return (T)Double.valueOf(jsonStrValue);
+		}else {
+			return JSON.parseObject(jsonStrValue, clazz);
+		}
+	}
+
 	public String get(String key) {
 		
 		Jedis jedis = null;
@@ -88,7 +105,9 @@ public class RedisService {
 		}
 		
 		// 基础类型则直接返回，不需要转json
-		if(value.getClass() == int.class || value.getClass() == Integer.class) {
+		if(value.getClass() == String.class) {
+			return String.valueOf(value);
+		}else if(value.getClass() == int.class || value.getClass() == Integer.class) {
 			return String.valueOf(value);
 		}else if(value.getClass() == long.class || value.getClass() == Long.class) {
 			return String.valueOf(value);
@@ -109,15 +128,5 @@ public class RedisService {
 		
 	}
 
-	@Bean
-	public JedisPool JedisPoolFactory() {
-		JedisPoolConfig poolConfig = new JedisPoolConfig();
-		poolConfig.setMaxTotal(redisConfig.getPoolMaxTotal());
-		poolConfig.setMaxIdle(redisConfig.getPoolMaxIdle());
-		poolConfig.setMaxWaitMillis(redisConfig.getPoolMaxWait()*1000);
-		
-		JedisPool jedisPool = new JedisPool(poolConfig, redisConfig.getHost(), redisConfig.getPort(), 
-				redisConfig.getTimeout() * 1000, redisConfig.getPassword());
-		return jedisPool;
-	}
+
 }
