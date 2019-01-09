@@ -19,18 +19,73 @@ public class RedisService {
 	private JedisPool jedisPool;
 	
 	
-	public <T> T get(String key, Class<T> clazz) {
+	public <T> T get(KeyPre keyPre, String key, Class<T> clazz) {
 		
-		Jedis jedis = null;
 		try {
-			jedis = jedisPool.getResource();
+			String redisKey = keyPre.getKeyPre() + key;
 			
-			String jsonStrValue = jedis.get(key);
+			String jsonStrValue = get(redisKey);
 			
 			return stringToBean(jsonStrValue, clazz);
 			
 		} catch (Exception e) {
 			logger.error("redis，获取，异常。", e);
+			return null;
+		}
+	}
+	
+	public Boolean exists(KeyPre keyPre, String key) {
+		
+		Jedis jedis = null;
+		try {
+			jedis = jedisPool.getResource();
+			
+			String redisKey = keyPre.getKeyPre() + key;
+			
+			return jedis.exists(redisKey);
+			
+		} catch (Exception e) {
+			logger.error("redis，存在，异常。", e);
+			return false;
+		}
+		finally
+		{
+			closeRedisConn(jedis);
+		}
+	}
+	
+	public Long incr(KeyPre keyPre, String key) {
+		
+		Jedis jedis = null;
+		try {
+			jedis = jedisPool.getResource();
+			
+			String redisKey = keyPre.getKeyPre() + key;
+			
+			return jedis.incr(redisKey);
+			
+		} catch (Exception e) {
+			logger.error("redis，自增，异常。", e);
+			return null;
+		}
+		finally
+		{
+			closeRedisConn(jedis);
+		}
+	}
+	
+	public Long decr(KeyPre keyPre, String key) {
+		
+		Jedis jedis = null;
+		try {
+			jedis = jedisPool.getResource();
+			
+			String redisKey = keyPre.getKeyPre() + key;
+			
+			return jedis.decr(redisKey);
+			
+		} catch (Exception e) {
+			logger.error("redis，自减，异常。", e);
 			return null;
 		}
 		finally
@@ -60,7 +115,7 @@ public class RedisService {
 		}
 	}
 
-	public String get(String key) {
+	private String get(String key) {
 		
 		Jedis jedis = null;
 		try {
@@ -78,17 +133,23 @@ public class RedisService {
 		}
 	}
 	
-	public <T> boolean set(String key, T value) {
+	public <T> boolean set(KeyPre keyPre, String key, T value) {
 		Jedis jedis = null;
 		try {
 			jedis = jedisPool.getResource();
 			
 			String valueStr = valueToString(value);
 			
-			jedis.set(key, valueStr);
+			String redisKey = keyPre.getKeyPre() + key;
 			
+			int expireTimeSeconds = keyPre.getExpireTime();
+			//永不过期
+			if(expireTimeSeconds <= 0) {
+				jedis.set(redisKey, valueStr);
+			}else {
+				jedis.setex(redisKey, expireTimeSeconds, valueStr);
+			}
 			return true;
-			
 		} catch (Exception e) {
 			logger.error("redis，设置，异常。", e);
 			return false;
