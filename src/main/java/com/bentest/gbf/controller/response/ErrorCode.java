@@ -11,7 +11,11 @@ public enum ErrorCode {
     @Error(msg="鉴权不通过，请检查账号，密码，时间戳，固定串，以及MD5算法是否按照文档要求进行设置")  
     e1_100001,  
     
+    @Error(msg="参数不正确")  
+    e1_100002,
     
+    @Error(msg="登录失败")  
+    e1_100003,
     
       
     @Error(msg="系统异常")  

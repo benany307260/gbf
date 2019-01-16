@@ -2,6 +2,8 @@ package com.bentest.gbf.util;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
+import com.alibaba.druid.util.StringUtils;
+
 public class MD5Util {
 	public static String md5(String src) {
 		return DigestUtils.md5Hex(src);
@@ -25,6 +27,17 @@ public class MD5Util {
 	 * @return
 	 */
 	public static String getInputPwdMd5(String inputPwd, String salt) {
+		
+		if(StringUtils.isEmpty(inputPwd)) {
+			return null;
+		}
+		if(StringUtils.isEmpty(salt)) {
+			return null;
+		}
+		if(salt.length() < 32) {
+			return null;
+		}
+		
 		StringBuffer sbInputPwdMd5 = new StringBuffer();
 		sbInputPwdMd5
 		.append(salt.charAt(11))
@@ -39,7 +52,14 @@ public class MD5Util {
 	}
 	
 	public static void main(String[] args) {
-		System.out.println(MD5Util.getInputPwdMd5("abc123"));
+		
+		String inputPwd = MD5Util.getInputPwdMd5("abc123");
+		System.out.println(inputPwd);
+		
+		String dbPwd = MD5Util.getInputPwdMd5(inputPwd, "1234567890123456789012345678901234567890");
+		System.out.println(dbPwd);
+		
+		
 	}
 	
 }
