@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.bentest.gbf.Exception.BusinessException;
+import com.bentest.gbf.controller.response.ErrorCode;
 import com.bentest.gbf.domain.entity.User;
 import com.bentest.gbf.domain.mapper.UserMapper;
 import com.bentest.gbf.util.MD5Util;
@@ -18,16 +20,17 @@ public class UserService {
 	@Autowired
 	private UserMapper userMapper;
 	
-	public int checkUser(String userName, String password) {
+	
+	public boolean checkUser(String userName, String password) {
 		if(StringUtils.isEmpty(userName) || StringUtils.isEmpty(password)) {
 			logger.error("检查用户，userName或password为空");
-			return -1;
+			throw new BusinessException(ErrorCode.e1_100002);
 		}
 		
 		User user = userMapper.getUserByUserName(userName);
 		if(user == null) {
 			logger.error("检查用户，获取不到用户对象。userName="+userName);
-			return -2;
+			throw new BusinessException(ErrorCode.e1_100004);
 		}
 		
 		String dbPwd = user.getPassword();
@@ -36,9 +39,10 @@ public class UserService {
 		String inputPwd = MD5Util.getInputPwdMd5(password, salt);
 		
 		if(dbPwd.equals(inputPwd)) {
-			return 1;
+			return true;
 		}else {
-			return -3;
+			logger.error("检查用户，密码不正确。userName="+userName);
+			throw new BusinessException(ErrorCode.e1_100005);
 		}
 	}
 }

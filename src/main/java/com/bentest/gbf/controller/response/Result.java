@@ -31,6 +31,11 @@ public class Result<T> {
 		return new Result<String>(errorCode.getCode(), errorCode.getMessage(), "");
 	}
 	
+	public static Result<String> failure(String msg)
+	{
+		return new Result<String>("", msg, "");
+	}
+	
 	public String getCode() {
 		return code;
 	}

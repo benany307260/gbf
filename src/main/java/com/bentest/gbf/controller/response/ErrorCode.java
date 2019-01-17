@@ -17,6 +17,12 @@ public enum ErrorCode {
     @Error(msg="登录失败")  
     e1_100003,
     
+    @Error(msg="用户不存在")  
+    e1_100004,
+    
+    @Error(msg="密码不正确")  
+    e1_100005,
+    
       
     @Error(msg="系统异常")  
     e1_109999;  
