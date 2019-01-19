@@ -9,8 +9,6 @@ public class User {
 	
 	private String nickName;
 	
-	private String token;
-
 	public String getUserName() {
 		return userName;
 	}
@@ -42,14 +40,5 @@ public class User {
 	public void setNickName(String nickName) {
 		this.nickName = nickName;
 	}
-
-	public String getToken() {
-		return token;
-	}
-
-	public void setToken(String token) {
-		this.token = token;
-	}
-	
 	
 }

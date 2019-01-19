@@ -94,6 +94,26 @@ public class RedisService {
 		}
 	}
 	
+	public Long expire(KeyPre keyPre, String key, int seconds) {
+		
+		Jedis jedis = null;
+		try {
+			jedis = jedisPool.getResource();
+			
+			String redisKey = keyPre.getKeyPre() + key;
+			
+			return jedis.expire(redisKey, seconds);
+			
+		} catch (Exception e) {
+			logger.error("redis，设置失效时间，异常。", e);
+			return null;
+		}
+		finally
+		{
+			closeRedisConn(jedis);
+		}
+	}
+	
 	private <T> T stringToBean(String jsonStrValue, Class<T> clazz) {
 		if(jsonStrValue == null || jsonStrValue.length() < 1 || clazz == null) {
 			return null;

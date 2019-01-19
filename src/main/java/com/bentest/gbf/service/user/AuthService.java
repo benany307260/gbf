@@ -68,6 +68,9 @@ public class AuthService {
 		
 		String token = TokenUtil.createToken();
 		
+		user.setPassword("");
+		user.setSlat("");
+		
 		boolean redisResult = redisService.set(UserKeyPre.token, token, user);
 		if(!redisResult) {
 			logger.error("登录，存redis失败。userName="+userName+",token="+token);
@@ -85,6 +88,15 @@ public class AuthService {
 		cookie.setMaxAge(UserKeyPre.token.getExpireTime());
 		cookie.setPath("/");
 		return cookie;
+	}
+	
+	public User getUserByToken(String token) {
+		return redisService.get(UserKeyPre.token, token, User.class);
+	}
+	
+	public boolean updateTokenExpireTime(String token) {
+		redisService.expire(UserKeyPre.token, token, UserKeyPre.token.getExpireTime());
+		return true;
 	}
 	
 	private UserVo userToUserVo(User user) {
