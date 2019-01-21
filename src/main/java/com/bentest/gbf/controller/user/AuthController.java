@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bentest.gbf.controller.response.Result;
+import com.bentest.gbf.domain.entity.User;
 import com.bentest.gbf.service.user.AuthService;
 import com.bentest.gbf.vo.LoginInfoVo;
 import com.bentest.gbf.vo.UserVo;
@@ -38,5 +39,10 @@ public class AuthController {
 		logger.info("登录，成功。userName="+inputParam.getUserName()+",token="+userVo.getToken());
 		
 		return Result.success(userVo);
+	}
+	
+	@RequestMapping(value="/std/v1/user")
+	public Result<User> getCurrentUser(User user) {
+		return Result.success(user);
 	}
 }
